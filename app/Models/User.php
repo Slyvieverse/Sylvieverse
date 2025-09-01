@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'profile_picture',
+        'theme_preference',
     ];
 
     /**
@@ -43,6 +46,70 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'theme_preference' => 'string',
         ];
+    }
+        /**
+     * Get the addresses for the user.
+     */
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    /**
+     * Get the auctions created by the user.
+     */
+    public function auctions()
+    {
+        return $this->hasMany(Auction::class, 'seller_id');
+    }
+
+    /**
+     * Get the bids placed by the user.
+     */
+    public function bids()
+    {
+        return $this->hasMany(Bid::class, 'bidder_id');
+    }
+
+    /**
+     * Get the cart for the user.
+     */
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    /**
+     * Get the orders placed by the user.
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get the watchlist entries for the user.
+     */
+    public function watchlist()
+    {
+        return $this->hasMany(Watchlist::class);
+    }
+
+    /**
+     * Get the reviews submitted by the user.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Get the notifications for the user.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 }
