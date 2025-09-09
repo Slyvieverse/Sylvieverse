@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ProductController;
@@ -20,19 +21,25 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+
 
 Route::group(['middleware' => ['auth', 'isAdmin'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
-    Route::resource('users', UserController::class)->only(['index', 'edit', 'update', 'destroy']);
+    Route::resource('users', UserController::class);
 });
 
-// Admin routes group (protected by auth and admin middleware)
-Route::group(['middleware' => ['auth', 'isAdmin'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
-    Route::resource('categories', CategoryController::class);
-});
+
 
 // Admin routes group (protected by auth and admin middleware)
 Route::group(['middleware' => ['auth', 'isAdmin'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
+     Route::resource('orders', OrderController::class);
 });
+
+
+// Existing routes (e.g., for home, catalog, auctions)
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+
+require __DIR__.'/auth.php';

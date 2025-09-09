@@ -10,11 +10,30 @@ use Illuminate\Validation\Rule;
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource with search, filter, and pagination.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
+        $query = User::query();
+
+        // Search by name or email
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter by role
+        if ($role = $request->input('role')) {
+            if (in_array($role, ['admin', 'customer'])) {
+                $query->where('role', $role);
+            }
+        }
+
+        // Paginate results (10 users per page)
+        $users = $query->paginate(10)->appends($request->only(['search', 'role']));
+
         return view('admin.users.users-index', compact('users'));
     }
 
@@ -23,8 +42,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        // Not implemented in this version based on typical admin CRUD.
-        // Users are expected to register themselves.
+        // Not implemented: Users are expected to register themselves.
+        return redirect()->route('admin.users.index')->with('error', 'User creation is not available in the admin panel.');
     }
 
     /**
@@ -32,16 +51,15 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // Not implemented in this version.
+        // Not implemented.
+        return redirect()->route('admin.users.index')->with('error', 'User creation is not available in the admin panel.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        // Not implemented in this version.
-    }
+   public function show(string $id)
+{
+    $user = User::with('orders')->findOrFail($id);
+    return view('admin.users.users-show', compact('user'));
+}
 
     /**
      * Show the form for editing the specified resource.
