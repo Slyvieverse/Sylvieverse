@@ -9,13 +9,14 @@ use Illuminate\Support\Str;
 class CategoryController extends Controller
 {
     /**
-     * Display a listing of the categories.
+     * Display a listing of the categories.     
      */
     public function index()
-    {
-        $categories = Category::all();
-        return view('admin.categories.index', compact('categories'));
-    }
+{
+    $categories = Category::paginate(10);
+    return view('admin.categories.index', compact('categories'));
+}
+
 
     /**
      * Show the form for creating a new category.

@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto+Serif:wght@400;500;600&display=swap" rel="stylesheet">
-
+    @vite(['resources/js/app.js'])
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 </head>
@@ -80,6 +80,8 @@
                 <a href="/admin/users" class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900 hover:text-fuchsia-600 dark:hover:text-fuchsia-400">User Management</a>
                 <a href="/admin/categories" class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900 hover:text-fuchsia-600 dark:hover:text-fuchsia-400">Category Management</a>
                 <a href="/admin/products" class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900 hover:text-fuchsia-600 dark:hover:text-fuchsia-400">Product Catalog</a>
+                <a href="/admin/discounts" class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900 hover:text-fuchsia-600 dark:hover:text-fuchsia-400">Discount Management</a>
+                <a href="/admin/orders" class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900 hover:text-fuchsia-600 dark:hover:text-fuchsia-400">Order Management</a>
                 <a href="/admin/analytics" class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900 hover:text-fuchsia-600 dark:hover:text-fuchsia-400">Analytics</a>
                 <a href="/admin/settings" class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900 hover:text-fuchsia-600 dark:hover:text-fuchsia-400">Settings</a>
             </nav>

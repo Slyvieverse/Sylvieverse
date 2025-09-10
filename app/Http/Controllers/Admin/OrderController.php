@@ -4,70 +4,79 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\User;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-     /**
-     * Display a listing of the orders.
-     */
-    public function index()
-    {
-        $orders = Order::with(['user', 'orderItems.product'])->get();
-        return view('admin.orders.index', compact('orders'));
+ public function index(Request $request)
+{
+    $query = Order::with('user');
+
+    // Search (ID, User name)
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('id', $search) // exact ID match
+              ->orWhereHas('user', function ($q) use ($search) {
+                  $q->where('name', 'like', "%{$search}%");
+              })
+              ->orWhere('status', 'like', "%{$search}%");
+        });
     }
 
-    /**
-     * Display the specified order.
-     */
+    // Filter by order status
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    // Filter by payment status
+    if ($request->filled('payment_status')) {
+        $query->where('payment_status', $request->payment_status);
+    }
+
+    $orders = $query->paginate(10)->appends($request->query());
+
+    return view('admin.orders.index', compact('orders'));
+}
+
     public function show(Order $order)
     {
-        $order->load(['user', 'orderItems.product', 'orderItems.product.category']);
+        $order->load(['user', 'orderItems.product.category']);
         return view('admin.orders.show', compact('order'));
     }
 
-    /**
-     * Show the form for creating a new order.
-     */
-    public function create()
+    public function edit(Order $order)
     {
-        // Not implemented: Orders are typically created by users or auction processes
-        return redirect()->route('admin.orders.index')->with('error', 'Order creation is not available in the admin panel.');
+        $order->load(['user', 'orderItems.product']);
+        $users = User::all();
+        $products = Product::where('status', 'active')->get();
+        return view('admin.orders.edit', compact('order', 'users', 'products'));
     }
 
-    /**
-     * Store a newly created order in storage.
-     */
-    public function store(Request $request)
+    public function update(Request $request, Order $order)
     {
-        // Not implemented: Orders are typically created by users or auction processes
-        return redirect()->route('admin.orders.index')->with('error', 'Order creation is not available in the admin panel.');
+        $request->validate([
+            'status' => ['required', 'in:pending,processing,completed,cancelled'],
+            'payment_status' => ['required', 'in:pending,paid,failed,refunded'],
+        ]);
+
+        $order->update([
+            'status' => $request->status,
+            'payment_status' => $request->payment_status,
+        ]);
+
+        return redirect()->route('admin.orders.index')
+            ->with('success', 'Order status updated successfully.');
     }
 
-    /**
-     * Show the form for editing the specified order.
-     */
-    public function edit(string $id)
+    public function destroy(Order $order)
     {
-        // Not implemented: Orders are typically not edited by admins to maintain integrity
-        return redirect()->route('admin.orders.index')->with('error', 'Order editing is not available in the admin panel.');
-    }
-
-    /**
-     * Update the specified order in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        // Not implemented: Orders are typically not edited by admins to maintain integrity
-        return redirect()->route('admin.orders.index')->with('error', 'Order editing is not available in the admin panel.');
-    }
-
-    /**
-     * Remove the specified order from storage.
-     */
-    public function destroy(string $id)
-    {
-        // Not implemented: Orders are typically not deleted by admins to maintain records
-        return redirect()->route('admin.orders.index')->with('error', 'Order deletion is not available in the admin panel.');
+        $order->orderItems()->delete();
+        $order->delete();
+        return redirect()->route('admin.orders.index')
+            ->with('success', 'Order deleted successfully.');
     }
 }

@@ -55,4 +55,18 @@ class Product extends Model
     {
         return $this->hasMany(Discount::class);
     }
+    public function activeDiscount()
+    {
+        return $this->discounts()->where(function ($query) {
+            $query->whereNull('start_date')->orWhere('start_date', '<=', now());
+        })->where(function ($query) {
+            $query->whereNull('end_date')->orWhere('end_date', '>=', now());
+        })->first();
+    }
+
+    public function getDiscountedPrice(): float
+    {
+        $discount = $this->activeDiscount();
+        return $discount ? $discount->applyTo($this->price) : $this->price;
+    }
 }
