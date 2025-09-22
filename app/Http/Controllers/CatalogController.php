@@ -2,63 +2,42 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class CatalogController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Product::where('status', 'active')->with('category');
+
+        if ($search = $request->input('search')) {
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+        }
+
+        if ($category = $request->input('category')) {
+            $query->where('category_id', $category);
+        }
+
+        $products = $query->paginate(12);
+        $categories = Category::all();
+
+        return view('catalog.index', compact('products', 'categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(Product $product)
     {
-        //
-    }
+        $product->load('category', 'reviews');
+        // Fetch related products (same category, exclude current product, limit 3)
+        $relatedProducts = Product::where('status', 'active')
+            ->where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->with('category')
+            ->take(3)
+            ->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return view('catalog.show', compact('product', 'relatedProducts'));
     }
 }

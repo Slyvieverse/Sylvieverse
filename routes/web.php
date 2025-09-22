@@ -7,6 +7,10 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\UserOrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -47,3 +51,25 @@ Route::get('/', function () {
 })->name('home');
 
 require __DIR__.'/auth.php';
+
+
+Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
+Route::get('/catalog/{product}', [CatalogController::class, 'show'])->name('catalog.show');
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+   Route::get('/cart-count', [CartController::class, 'count'])->name('cart.count');
+    Route::post('/cart/{product}', [CartController::class, 'add'])->name('cart.add');
+    Route::patch('/cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
+});
+Route::middleware('auth')->group(function () {
+    Route::get('/orders', [UserOrderController::class, 'index'])->name('user.orders.index');
+    Route::get('/orders/{order}', [UserOrderController::class, 'show'])->name('user.orders.show');
+});
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+});

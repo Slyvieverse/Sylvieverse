@@ -56,7 +56,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Address::class);
     }
-
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
     /**
      * Get the auctions created by the user.
      */

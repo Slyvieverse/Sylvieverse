@@ -93,10 +93,10 @@
                                                 {{ $item->quantity }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-[--color-text-200]">
-                                                ${{ number_format($item->unit_price, 2) }}
+                                                ${{$item->price_at_purchase}} 
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-[--color-text-200]">
-                                                ${{ number_format($item->quantity * $item->unit_price, 2) }}
+                                                ${{ $item->quantity * $item->price_at_purchase }}
                                             </td>
                                         </tr>
                                     @endforeach
