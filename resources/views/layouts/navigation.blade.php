@@ -8,6 +8,9 @@
                 <a href="{{ route('home') }}" class="text-xl font-bold text-gray-800 dark:text-gray-100">
                     {{ config('app.name', 'Sylvieverse') }}
                 </a>
+                <a href="{{ route('auctions.create') }}" class="text-xl font-bold text-gray-800 dark:text-gray-100">
+                    Create Auction
+                </a>
 
                 <!-- Main Nav Links -->
                 <div class="hidden md:flex space-x-6">

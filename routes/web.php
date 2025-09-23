@@ -11,6 +11,8 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\UserOrderController;
+use App\Http\Controllers\AuctionController;
+use App\Http\Controllers\BidController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -72,4 +74,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+});
+
+// Public Auction Routes (require auth for create/store, but index/show are public)
+
+Route::middleware('auth')->group(function () {
+    Route::get('/auctions/{auction}', [AuctionController::class, 'show'])->name('auctions.show');
+    Route::get('/auctions', [AuctionController::class, 'index'])->name('auctions.index');
+    Route::get('/auctions/create', [AuctionController::class, 'create'])->name('auctions.create');
+    Route::post('/auctions', [AuctionController::class, 'store'])->name('auctions.store');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/auctions/{auction}/bids', [BidController::class, 'store'])->name('bids.store');
 });
