@@ -79,12 +79,47 @@ Route::middleware('auth')->group(function () {
 // Public Auction Routes (require auth for create/store, but index/show are public)
 
 Route::middleware('auth')->group(function () {
-    Route::get('/auctions/{auction}', [AuctionController::class, 'show'])->name('auctions.show');
     Route::get('/auctions', [AuctionController::class, 'index'])->name('auctions.index');
     Route::get('/auctions/create', [AuctionController::class, 'create'])->name('auctions.create');
     Route::post('/auctions', [AuctionController::class, 'store'])->name('auctions.store');
+    Route::get('/auctions/{auction}', [AuctionController::class, 'show'])->name('auctions.show');
 });
 
 Route::middleware('auth')->group(function () {
     Route::post('/auctions/{auction}/bids', [BidController::class, 'store'])->name('bids.store');
 });
+
+
+
+
+
+Route::group(['middleware' => ['auth', 'isAdmin'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
+    Route::resource('categories', CategoryController::class);
+    Route::resource('orders', OrderController::class);
+    Route::resource('users', UserController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
+    Route::resource('products', ProductController::class);
+});
+
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+
+Route::get('/catalog', [ProductController::class, 'index'])->name('catalog');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+});
+
+Route::get('/auctions', [AuctionController::class, 'index'])->name('auctions.index');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/auctions/create', [AuctionController::class, 'create'])->name('auctions.create');
+    Route::post('/auctions', [AuctionController::class, 'store'])->name('auctions.store');
+    Route::get('/auctions/{auction}', [AuctionController::class, 'show'])->name('auctions.show');
+    Route::get('/auctions/{auction}/edit', [AuctionController::class, 'edit'])->name('auctions.edit');
+    Route::put('/auctions/{auction}', [AuctionController::class, 'update'])->name('auctions.update');
+    Route::delete('/auctions/{auction}', [AuctionController::class, 'destroy'])->name('auctions.destroy');
+});
+
+require __DIR__.'/auth.php';

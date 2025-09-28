@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -65,6 +66,9 @@ class ProductController extends Controller
 
         // Set is_featured to false if not provided
         $validated['is_featured'] = $request->has('is_featured') ? true : false;
+
+        // Add user_id
+        $validated['user_id'] = Auth::id();
 
         Product::create($validated);
 

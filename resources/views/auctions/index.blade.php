@@ -1,6 +1,4 @@
 <x-app-layout>
-
-@section('content')
     <div class="min-h-screen bg-gradient-to-br from-[--background-900] to-[--background-800] py-12 px-4 sm:px-6 lg:px-8">
         <!-- Header Section -->
         <header class="text-center mb-12">
@@ -9,13 +7,19 @@
         </header>
 
         <!-- Sort/Filter Bar -->
-        <div class="flex justify-end mb-6">
+        <form class="flex flex-col sm:flex-row justify-end mb-6 space-y-4 sm:space-y-0 sm:space-x-4">
+            <select name="category_id" onchange="this.form.submit()" class="bg-[--background-700] border border-[--primary-700] text-[--text-50] font-body py-2 px-4 rounded-lg focus:outline-none focus:border-[--primary-500] transition-all duration-300">
+                <option value="">All Categories</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                @endforeach
+            </select>
             <select name="sort" onchange="this.form.submit()" class="bg-[--background-700] border border-[--primary-700] text-[--text-50] font-body py-2 px-4 rounded-lg focus:outline-none focus:border-[--primary-500] transition-all duration-300">
                 <option value="">Sort By: Newest</option>
-                <option value="ending_soon">Ending Soon</option>
-                <option value="highest_bid">Highest Bid</option>
+                <option value="ending_soon" {{ request('sort') == 'ending_soon' ? 'selected' : '' }}>Ending Soon</option>
+                <option value="highest_bid" {{ request('sort') == 'highest_bid' ? 'selected' : '' }}>Highest Bid</option>
             </select>
-        </div>
+        </form>
 
         <!-- Auction Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -26,7 +30,7 @@
 
                     <!-- Image Container with Hover Zoom -->
                     <div class="overflow-hidden">
-                        <img src="{{ $auction->product->image_url ?? 'https://placeholder.co/400x300' }}" alt="{{ $auction->product->name }}" class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-1">
+                        <img src="{{ $auction->product->image_url ? asset('storage/' . $auction->product->image_url) : 'https://placeholder.co/400x300' }}" alt="{{ $auction->product->name }}" class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-1">
                     </div>
 
                     <!-- Content -->
@@ -37,7 +41,7 @@
                         <!-- Seller & Time Left -->
                         <div class="flex justify-between text-[--text-400] font-body text-sm mb-4">
                             <span>By: {{ $auction->seller->name }}</span>
-                            <span class="text-[--accent-400] animate-pulse">Ends in: {{ now()->diffForHumans($auction->planned_end_time) }}</span>
+                            <span class="text-[--accent-400] animate-pulse" data-timer="{{ $auction->planned_end_time->timestamp }}" data-auction-id="{{ $auction->id }}">Ends in: <span class="countdown">Calculating...</span></span>
                         </div>
 
                         <!-- Bid Info -->
@@ -54,7 +58,7 @@
 
                         <!-- CTA Button with Glow -->
                         <a href="{{ route('auctions.show', $auction) }}" class="block bg-gradient-to-r from-[--primary-600] to-[--primary-500] hover:from-[--primary-700] hover:to-[--primary-600] text-[--text-50] font-heading font-bold text-sm px-6 py-3 rounded-lg transition-all duration-300 shadow-md shadow-[--primary-500]/30 hover:shadow-lg hover:shadow-[--primary-500]/50 text-center">
-                            Bid Now
+                            View Auction
                         </a>
                     </div>
                 </div>
@@ -65,8 +69,39 @@
 
         <!-- Pagination -->
         <div class="mt-12">
-            {{ $auctions->links() }} <!-- Use Tailwind pagination if customized -->
+            {{ $auctions->links() }}
         </div>
     </div>
-@endsection
+
+    <!-- JavaScript for Countdown Timer -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const timers = document.querySelectorAll('[data-timer]');
+            timers.forEach(timer => {
+                const endTime = parseInt(timer.dataset.timer) * 1000; // Convert to milliseconds
+                const auctionId = timer.dataset.auctionId;
+                const countdownElement = timer.querySelector('.countdown');
+
+                function updateTimer() {
+                    const now = new Date().getTime();
+                    const timeLeft = endTime - now;
+
+                    if (timeLeft <= 0) {
+                        countdownElement.textContent = 'Ended';
+                        return;
+                    }
+
+                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                    countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                }
+
+                updateTimer();
+                setInterval(updateTimer, 1000);
+            });
+        });
+    </script>
 </x-app-layout>

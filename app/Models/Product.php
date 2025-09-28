@@ -15,6 +15,7 @@ class Product extends Model
         'image_url',
         'is_featured',
         'status',
+        'user_id',
     ];
 
     protected $casts = [
@@ -69,4 +70,9 @@ class Product extends Model
         $discount = $this->activeDiscount();
         return $discount ? $discount->applyTo($this->price) : $this->price;
     }
+    public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
 }
