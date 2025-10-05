@@ -100,17 +100,7 @@ Route::group(['middleware' => ['auth', 'isAdmin'], 'prefix' => 'admin', 'as' => 
     Route::resource('products', ProductController::class);
 });
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
 
-Route::get('/catalog', [ProductController::class, 'index'])->name('catalog');
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
-    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
-});
 
 Route::get('/auctions', [AuctionController::class, 'index'])->name('auctions.index');
 Route::middleware(['auth'])->group(function () {
