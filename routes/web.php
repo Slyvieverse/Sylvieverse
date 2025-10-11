@@ -5,8 +5,9 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\AdminAuctionController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -113,3 +114,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::group(['middleware' => ['auth', 'isAdmin'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
+    // Existing routes...
+    Route::resource('auctions', AdminAuctionController::class);
+    Route::post('auctions/{auction}/cancel', [AdminAuctionController::class, 'cancel'])->name('auctions.cancel');
+    Route::post('auctions/{auction}/close', [AdminAuctionController::class, 'close'])->name('auctions.close');
+});
