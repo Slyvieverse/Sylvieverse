@@ -16,6 +16,7 @@ use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\BidController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WatchlistController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -102,7 +103,12 @@ Route::group(['middleware' => ['auth', 'isAdmin'], 'prefix' => 'admin', 'as' => 
     Route::resource('products', ProductController::class);
 });
 
-
+// routes/web.php
+Route::middleware('auth')->group(function () {
+    Route::get('/watchlist', [WatchlistController::class, 'index'])->name('watchlist.index');
+    Route::post('/watchlist', [WatchlistController::class, 'store'])->name('watchlist.add');
+    Route::delete('/watchlist/{watchlist}', [WatchlistController::class, 'destroy'])->name('watchlist.remove');
+});
 
 Route::get('/auctions', [AuctionController::class, 'index'])->name('auctions.index');
 Route::middleware(['auth'])->group(function () {
@@ -126,8 +132,15 @@ Route::group(['middleware' => ['auth', 'isAdmin'], 'prefix' => 'admin', 'as' => 
 
 Route::get('/about', [PageController::class, 'about']);
 Route::get('/contact', [PageController::class, 'contact']);
+Route::post('/contact', [PageController::class, 'store']);
 
 // routes/web.php
 Route::get('/contact', function () {
     return view('contact');
+});
+// routes/web.php
+Route::get('/auction/{auction}/pay', [AuctionController::class, 'payWinningBid'])
+    ->name('auction.pay');
+    Route::middleware('auth')->group(function () {
+    Route::get('/my-auctions', [AuctionController::class, 'myAuctions'])->name('auctions.my');
 });

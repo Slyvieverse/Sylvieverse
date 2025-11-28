@@ -16,7 +16,6 @@ class CheckoutController extends Controller
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));
     }
-
 public function index()
 {
     $cart = Auth::user()->cart;
@@ -24,10 +23,10 @@ public function index()
         return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
     }
 
-    $total = $cart->items->sum(fn($item) => $item->quantity * $item->product->price);
+    $total = $cart->items->sum(fn($item) => $item->quantity * $item->product->final_price);
 
     $paymentIntent = PaymentIntent::create([
-        'amount' => $total * 100, // in cents
+        'amount' => $total * 100,
         'currency' => 'usd',
         'metadata' => ['user_id' => Auth::id()],
         'automatic_payment_methods' => ['enabled' => true],
@@ -40,53 +39,52 @@ public function index()
     ]);
 }
 
+public function store(Request $request)
+{
+    $cart = Auth::user()->cart;
+    $total = $cart->items->sum(fn($item) => $item->quantity * $item->product->final_price);
 
-    public function store(Request $request)
-    {
-        $cart = Auth::user()->cart;
-        $total = $cart->items->sum(fn($item) => $item->quantity * $item->product->price);
+    $paymentIntent = PaymentIntent::create([
+        'amount' => $total * 100,
+        'currency' => 'usd',
+        'metadata' => ['user_id' => Auth::id()],
+    ]);
 
-        // Create PaymentIntent on server
-        $paymentIntent = PaymentIntent::create([
-            'amount' => $total * 100, // Stripe uses cents
-            'currency' => 'usd',
-            'metadata' => ['user_id' => Auth::id()],
+    return response()->json([
+        'client_secret' => $paymentIntent->client_secret,
+    ]);
+}
+
+public function success(Request $request)
+{
+    $cart = Auth::user()->cart;
+    $total = $cart->items->sum(fn($item) => $item->quantity * $item->product->final_price);
+
+    $order = Order::create([
+        'user_id' => Auth::id(),
+        'total_amount' => $total,
+        'status' => 'completed',
+        'payment_status' => 'paid',
+        'payment_gateway' => 'stripe',
+        'transaction_id' => $request->input('payment_intent'),
+        'shipping_address' => 'Digital Delivery',
+    ]);
+
+    foreach ($cart->items as $item) {
+        OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $item->product_id,
+            'quantity' => $item->quantity,
+            'price_at_purchase' => $item->product->final_price,
+            'original_price' => $item->product->price,
         ]);
 
-        // For now, return client secret for frontend confirmation
-        return response()->json([
-            'client_secret' => $paymentIntent->client_secret,
-        ]);
+        $item->product->decrement('stock_quantity', $item->quantity);
     }
 
-    public function success(Request $request)
-    {
-        // Verify payment (use $request->session() for real impl)
-        // Create Order from cart, clear cart
-        $cart = Auth::user()->cart;
-     $total = $cart->items->sum(fn($item) => $item->quantity * $item->product->price);
+    $cart->items()->delete();
 
-$order = Order::create([
-    'user_id' => Auth::id(),
-    'total_amount' => $total,  // ✅ not null anymore
-    'status' => 'completed',
-    'payment_status' => 'paid',
-    'payment_gateway' => 'stripe',
-    'transaction_id' => $request->input('payment_intent'),
-    'shipping_address' => $request->input('shipping_address', 'Default Address'),
-]);
+    return view('checkout.success', compact('order', 'total'));
+}
 
-        foreach ($cart->items as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'price_at_purchase' => $item->product->price,
-            ]);
-        }
-
-        $cart->items->each->delete(); // Clear cart
-
-        return view('checkout.success', compact('order' , 'total'));
-    }
 }

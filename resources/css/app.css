@@ -1,6 +1,6 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities;  
+@tailwind utilities;
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -15,7 +15,51 @@ body {
   background-color: #f8fafc;
   transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
+/*
+|--------------------------------------------------------------------------
+| CSS Variables for Theme Switching (Example structure)
+|--------------------------------------------------------------------------
+*/
 
+:root {
+    /* Light Mode Defaults */
+    --color-background-900: #f5f5f7;  /* Near white */
+    --color-background-800: #ffffff;  /* Pure white */
+    --color-background-700: #f0f0f4;  /* Light gray */
+
+    --color-text-50: #1e1e2f;       /* Dark text */
+    --color-text-200: #4b5563;      /* Muted dark text */
+    --color-text-300: #9ca3af;      /* Gray text */
+
+    --color-primary-600: #6d28d9;   /* Deep Blue/Purple */
+    --color-primary-500: #8b5cf6;
+    --color-primary-400: #a78bfa;
+
+    --color-accent-600: #db2777;    /* Deep Pink */
+    --color-accent-500: #ec4899;
+    --color-accent-400: #f472b6;
+    --color-accent-blue: #3b82f6;   /* Standard blue for contrast */
+}
+
+/* Dark Mode Overrides (Activated by adding 'dark' class to <html>) */
+.dark {
+    --color-background-900: #0a0a0e;
+    --color-background-800: #1e1e2f;
+    --color-background-700: #0f0f1e;
+
+    --color-text-50: #f5f5f7;
+    --color-text-200: #d1d5db;
+    --color-text-300: #9ca3af;
+
+    --color-primary-600: #5b21b6;   /* Purple-600 */
+    --color-primary-500: #7c3aed;   /* Violet-500 */
+    --color-primary-400: #a78bfa;   /* Violet-400 */
+
+    --color-accent-600: #ec4899;    /* Pink-500 */
+    --color-accent-500: #f472b6;    /* Pink-400 */
+    --color-accent-400: #c084fc;    /* Purple-400 for glow */
+    --color-accent-blue: #3b82f6;
+}
 @theme {
   /* Light theme variables */
   --color-text-50: #f0f1f5;
@@ -29,7 +73,7 @@ body {
   --color-text-800: #29303d;
   --color-text-900: #14181f;
   --color-text-950: #0a0c0f;
-  
+
   --color-background-50: #f0f2f5;
   --color-background-100: #e0e6eb;
   --color-background-200: #c2ccd6;
@@ -41,7 +85,7 @@ body {
   --color-background-800: #29333d;
   --color-background-900: #14191f;
   --color-background-950: #0a0d0f;
-  
+
   --color-primary-50: #f8e7fe;
   --color-primary-100: #f1cefd;
   --color-primary-200: #e39dfb;
@@ -53,7 +97,7 @@ body {
   --color-primary-800: #4a0462;
   --color-primary-900: #250231;
   --color-primary-950: #130118;
-  
+
   --color-secondary-50: #f3eff5;
   --color-secondary-100: #e7dfec;
   --color-secondary-200: #d0c0d8;
@@ -65,7 +109,7 @@ body {
   --color-secondary-800: #37273f;
   --color-secondary-900: #1b1320;
   --color-secondary-950: #0e0a10;
-  
+
   --color-accent-50: #f5eff4;
   --color-accent-100: #ebe0e9;
   --color-accent-200: #d8c0d3;
@@ -93,7 +137,7 @@ body {
     --color-text-800: #c2c9d6;
     --color-text-900: #e0e4eb;
     --color-text-950: #f0f1f5;
-    
+
     --color-background-50: #0a0d0f;
     --color-background-100: #14191f;
     --color-background-200: #29333d;
@@ -105,7 +149,7 @@ body {
     --color-background-800: #c2ccd6;
     --color-background-900: #e0e6eb;
     --color-background-950: #f0f2f5;
-    
+
     --color-primary-50: #130118;
     --color-primary-100: #250231;
     --color-primary-200: #4a0462;
@@ -117,7 +161,7 @@ body {
     --color-primary-800: #e39dfb;
     --color-primary-900: #f1cefd;
     --color-primary-950: #f8e7fe;
-    
+
     --color-secondary-50: #0e0a10;
     --color-secondary-100: #1b1320;
     --color-secondary-200: #37273f;
@@ -129,7 +173,7 @@ body {
     --color-secondary-800: #d0c0d8;
     --color-secondary-900: #e7dfec;
     --color-secondary-950: #f3eff5;
-    
+
     --color-accent-50: #100a0f;
     --color-accent-100: #1f141d;
     --color-accent-200: #3f273a;

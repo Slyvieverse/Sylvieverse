@@ -7,12 +7,12 @@
             --color-primary-500: #673AB7; /* Main Purple */
             --color-primary-600: #512DA8; /* Deeper Purple */
             --color-primary-700: #311B92; /* Darkest Purple */
-            
+
             /* ✨ Unified Accent Color - Neon Blue Glow */
             --color-accent-blue-500: #00BCD4; /* Main Neon Blue */
             --color-accent-blue-400: #4DD0E1; /* Lighter Blue */
             --color-accent-blue-600: #0097A7; /* Deeper Blue */
-            
+
             /* Success Color */
             --color-success-400: #68D391; /* Light Green */
             --color-success-500: #48BB78; /* Main Green */
@@ -30,9 +30,9 @@
             --shadow-accent-blue-glow: 0 0 10px var(--color-accent-blue-500), 0 0 20px var(--color-accent-blue-400);
             --shadow-success-glow: 0 0 10px var(--color-success-500), 0 0 20px var(--color-success-400);
             --shadow-tech-box: 0 0 15px rgba(49, 27, 146, 0.6); /* Dark purple base shadow */
-            
+
             /* Typography */
-            --font-heading: 'Exo 2', sans-serif; 
+            --font-heading: 'Exo 2', sans-serif;
         }
 
         /* 🌙 Dark Mode Overrides */
@@ -50,10 +50,10 @@
             --color-background-700: #EDF2F7; /* Light Gray */
             /* Text */
             --color-text-50: #1A202C; /* Dark text */
-            --color-text-200: #4A5568; 
+            --color-text-200: #4A5568;
             --color-text-300: #718096;
             /* Shadows */
-            --shadow-tech-box: 0 4px 15px rgba(0, 0, 0, 0.1); 
+            --shadow-tech-box: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         /* Success Icon Animation (Green glow retained for clarity) */
@@ -73,7 +73,7 @@
         .tech-box {
             background-color: var(--color-background-800)/50;
             backdrop-filter: blur(8px);
-            box-shadow: var(--shadow-tech-box); 
+            box-shadow: var(--shadow-tech-box);
             transition: all 0.4s ease-in-out;
             border: 1px solid var(--color-primary-700);
         }
@@ -117,7 +117,7 @@
         }
 
     </style>
-    
+
     <script>
         // Theme logic retained for consistency
         const storedTheme = localStorage.getItem('theme');
@@ -128,7 +128,7 @@
         } else if (storedTheme === 'dark' || (!storedTheme && systemPrefersDark)) {
             document.documentElement.classList.add('dark');
         } else {
-            document.documentElement.classList.add('dark'); // Default to dark 
+            document.documentElement.classList.add('dark'); // Default to dark
         }
 
         function toggleTheme() {
@@ -159,7 +159,7 @@
                     </svg>
                 </button>
             </div>
-            
+
             <div class="flex justify-center items-center">
                 <div class="tech-box rounded-xl p-8 md:p-12 text-center max-w-xl w-full"
                     style="animation: page-enter 0.5s ease-out 0.2s forwards; opacity: 0;"
@@ -196,7 +196,7 @@
                                 <p class="text-[var(--color-text-300)]">Total Paid:</p>
                                 <span class="text-3xl font-bold text-neon-accent">${{ number_format($order->total_amount, 2) }}</span>
                             </div>
-                            
+
                             <h3 class="text-lg font-heading text-[var(--color-text-50)] font-bold mb-2">Assets Purchased:</h3>
                             <ul class="text-[var(--color-text-200)] space-y-1 text-sm">
                                 @foreach($order->orderItems as $item)
@@ -208,12 +208,12 @@
                             </ul>
                         </div>
                     </div>
-                    
+
                     <div class="flex flex-col sm:flex-row justify-center gap-4"
                         style="animation: page-enter 0.5s ease-out 1.4s forwards; opacity: 0;"
                     >
-                        <a href="{{ route('checkout.index') }}" class="px-8 py-4 rounded-lg btn-primary-enhanced text-[var(--color-text-50)] font-bold text-lg">
-                            Access Your Downloads
+                        <a href="{{ route('user.orders.index') }}" class="px-8 py-4 rounded-lg btn-primary-enhanced text-[var(--color-text-50)] font-bold text-lg">
+                            Access Your Orders
                         </a>
                         <a href="{{ route('catalog') }}" class="px-8 py-4 rounded-lg btn-secondary-tech text-[var(--color-text-50)] font-medium text-lg transition-all">
                             Continue Shopping

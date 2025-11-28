@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Auction;
-use App\Models\Bid;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -14,148 +13,112 @@ class AuctionController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Auction::with(['product', 'seller', 'product.category'])
+        $query = Auction::with(['product.category', 'seller'])
             ->where('status', 'active')
             ->where('planned_end_time', '>', now());
 
-        // Category filter
         if ($request->filled('category_id')) {
-            $query->whereHas('product', function ($q) use ($request) {
-                $q->where('category_id', $request->category_id);
-            });
+            $query->whereHas('product', fn($q) => $q->where('category_id', $request->category_id));
         }
 
-        // Sorting
-        if ($request->filled('sort')) {
-            if ($request->sort === 'ending_soon') {
-                $query->orderBy('planned_end_time', 'asc');
-            } elseif ($request->sort === 'highest_bid') {
-                $query->orderBy('current_bid', 'desc');
-            } else {
-                $query->orderBy('created_at', 'desc');
-            }
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
+        $sort = $request->get('sort', 'newest');
+        $query->when($sort, function ($q, $sort) {
+            return match ($sort) {
+                'ending_soon' => $q->orderBy('planned_end_time'),
+                'highest_bid'  => $q->orderByDesc('current_bid'),
+                'most_bids'    => $q->orderByDesc('bid_count'),
+                default        => $q->orderByDesc('created_at'),
+            };
+        });
 
-        $auctions = $query->paginate(12);
-        $categories = Category::all();
-
-        return view('auctions.index', compact('auctions', 'categories'));
+        return view('auctions.index', [
+            'auctions'    => $query->paginate(12)->withQueryString(),
+            'categories'  => Category::all(),
+            'currentSort' => $sort,
+        ]);
     }
 
     public function create()
     {
-        $categories = Category::all();
-        return view('auctions.create', compact('categories'));
+        return view('auctions.create', ['categories' => Category::all()]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'stock_quantity' => ['required', 'integer', 'min:0'],
-            'image_url' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
-            'starting_price' => ['required', 'numeric', 'min:0'],
-            'start_time' => ['required', 'date', 'after_or_equal:now'],
-            'planned_end_time' => ['required', 'date', 'after:start_time'],
+        $validated = $request->validate([
+            'name'             => 'required|string|max:255',
+            'description'      => 'nullable|string',
+            'price'            => 'required|numeric|min:0',
+            'category_id'      => 'required|exists:categories,id',
+            'stock_quantity'   => 'required|integer|min:1',
+            'image_url'        => 'nullable|image|mimes:jpeg,png,jpg|max:3072',
+            'starting_price'   => 'required|numeric|min:0.01',
+            'planned_end_time' => 'required|date|after:now+5minutes',
         ]);
 
-        $productData = $request->only([
-            'name', 'description', 'price', 'category_id', 'stock_quantity'
-        ]);
+        $productData = $request->only(['name', 'description', 'price', 'category_id', 'stock_quantity']);
         $productData['user_id'] = Auth::id();
-        $productData['status'] = 'active';
+        $productData['status']  = 'active';
 
         if ($request->hasFile('image_url')) {
-            $productData['image_url'] = $request->file('image_url')->store('product_images', 'public');
+            $productData['image_url'] = $request->file('image_url')->store('products', 'public');
         }
 
         $product = Product::create($productData);
 
         Auction::create([
-            'product_id' => $product->id,
-            'seller_id' => Auth::id(),
-            'starting_price' => $request->starting_price,
-            'status' => 'active',
-            'start_time' => $request->start_time,
-            'planned_end_time' => $request->planned_end_time,
+            'product_id'       => $product->id,
+            'seller_id'        => Auth::id(),
+            'starting_price'   => $validated['starting_price'],
+            'current_bid'      => $validated['starting_price'],
+            'status'           => 'active',
+            'planned_end_time' => $validated['planned_end_time'],
+            'bid_count'        => 0,
         ]);
 
-        return redirect()->route('auctions.index')->with('success', 'Auction & product created successfully!');
+        return redirect()->route('auctions.index')->with('success', 'Auction created and live!');
     }
 
     public function show(Auction $auction)
     {
-        $auction->load(['product', 'seller', 'bids.bidder']);
-        $timeLeft = now()->diffForHumans($auction->planned_end_time, true);
-        return view('auctions.show', compact('auction', 'timeLeft'));
-    }
-
-    public function edit(Auction $auction)
-    {
-        if ($auction->seller_id !== Auth::id()) {
-            return redirect()->route('auctions.show', $auction)->with('error', 'Unauthorized action.');
-        }
-        $categories = Category::all();
-        return view('auctions.edit', compact('auction', 'categories'));
-    }
-
-    public function update(Request $request, Auction $auction)
-    {
-        if ($auction->seller_id !== Auth::id()) {
-            return redirect()->route('auctions.show', $auction)->with('error', 'Unauthorized action.');
-        }
-
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'stock_quantity' => ['required', 'integer', 'min:0'],
-            'image_url' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
-            'starting_price' => ['required', 'numeric', 'min:0'],
-            'start_time' => ['required', 'date', 'after_or_equal:now'],
-            'planned_end_time' => ['required', 'date', 'after:start_time'],
-        ]);
-
-        $productData = $request->only([
-            'name', 'description', 'price', 'category_id', 'stock_quantity'
-        ]);
-
-        if ($request->hasFile('image_url')) {
-            if ($auction->product->image_url) {
-                Storage::disk('public')->delete($auction->product->image_url);
-            }
-            $productData['image_url'] = $request->file('image_url')->store('product_images', 'public');
-        }
-
-        $auction->product->update($productData);
-
-        $auction->update([
-            'starting_price' => $request->starting_price,
-            'start_time' => $request->start_time,
-            'planned_end_time' => $request->planned_end_time,
-        ]);
-
-        return redirect()->route('auctions.show', $auction)->with('success', 'Auction updated successfully!');
+        $auction->load(['product.category', 'seller', 'bids.bidder' => fn($q) => $q->latest()->limit(50)]);
+        return view('auctions.show', compact('auction'));
     }
 
     public function destroy(Auction $auction)
     {
         if ($auction->seller_id !== Auth::id()) {
-            return redirect()->route('auctions.show', $auction)->with('error', 'Unauthorized action.');
+            return back()->with('error', 'Not your auction!');
         }
 
         if ($auction->product->image_url) {
             Storage::disk('public')->delete($auction->product->image_url);
         }
+
         $auction->product->delete();
         $auction->delete();
 
-        return redirect()->route('auctions.index')->with('success', 'Auction deleted successfully!');
+        return redirect()->route('auctions.index')->with('success', 'Auction permanently deleted.');
+    }// In AuctionController.php
+public function payWinningBid(Auction $auction, Request $request)
+{
+    $pi = $request->query('payment_intent');
+
+    if ($auction->winner_id !== Auth::id()) {
+        abort(403);
     }
+
+    return view('auctions.pay-now', compact('auction', 'pi'));
+}
+// Add this method to your AuctionController
+public function myAuctions(Request $request)
+{
+    $auctions = Auction::with(['product', 'winner'])
+        ->where('seller_id', Auth::id())
+        ->orWhere('winner_id', Auth::id())
+        ->latest()
+        ->paginate(12);
+
+    return view('auctions.my-auctions', compact('auctions'));
+}
 }

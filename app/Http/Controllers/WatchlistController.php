@@ -2,63 +2,50 @@
 
 namespace App\Http\Controllers;
 
+use  Illuminate\Support\Facades\Auth;
+use  App\Models\Watchlist;
+
 use Illuminate\Http\Request;
 
 class WatchlistController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
+   // app/Http/Controllers/WatchlistController.php
+public function index()
+{
+    $watchlists = Auth::user()->watchlists()->with(['product', 'auction.product'])->latest()->get();
+    return view('watchlist.index', compact('watchlists'));
+}
+// app/Http/Controllers/WatchlistController.php
+public function store(Request $request)
+{
+    $request->validate([
+        'product_id' => 'nullable|exists:products,id',
+        'auction_id' => 'nullable|exists:auctions,id',
+    ], ['You can only watch one item at a time.']);
+
+    // Prevent watching both at once
+    if ($request->product_id && $request->auction_id) {
+        return back()->with('error', 'Invalid request.');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    Watchlist::firstOrCreate([
+        'user_id'     => Auth::id(),
+        'product_id'  => $request->product_id,
+        'auction_id'  => $request->auction_id,
+    ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+    return back()->with('success', 'Added to watchlist!');
+}
+public function destroy(Watchlist $watchlist)
+{
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        // Simple check: Only the owner can delete their own watchlist item
+        if ($watchlist->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $watchlist->delete();
+        return back()->with('success', 'Removed from watchlist!');
     }
 }
+

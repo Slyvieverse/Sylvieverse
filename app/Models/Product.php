@@ -74,5 +74,47 @@ class Product extends Model
 {
     return $this->belongsTo(User::class);
 }
+// Get currently active discount
+
+
+    // ACCESSORS — these make $product->final_price work in Blade
+    public function getFinalPriceAttribute(): float
+    {
+        $discount = $this->activeDiscount();
+        if (!$discount) {
+            return (float) $this->price;
+        }
+
+        return round($this->price * (1 - $discount->percent_off / 100), 2);
+    }
+
+    public function getHasDiscountAttribute(): bool
+    {
+        return $this->activeDiscount() !== null;
+    }
+
+    public function getDiscountPercentAttribute(): int
+    {
+        return $this->activeDiscount()?->percent_off ?? 0;
+    }
+
+    // Helper methods you can use in Blade
+    public function hasDiscount(): bool
+    {
+        return $this->getHasDiscountAttribute();
+    }
+
+    public function discountPercent(): int
+    {
+        return $this->getDiscountPercentAttribute();
+    }
+
+
+
+public function getDiscountAmountAttribute(): float
+{
+    return $this->price - $this->final_price;
+}
+
 
 }

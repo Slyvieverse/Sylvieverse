@@ -95,7 +95,7 @@ class User extends Authenticatable
     /**
      * Get the watchlist entries for the user.
      */
-    public function watchlist()
+    public function watchlists()
     {
         return $this->hasMany(Watchlist::class);
     }

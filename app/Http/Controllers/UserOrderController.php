@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class UserOrderController extends Controller
 {
-  
+
     public function index()
     {
         $orders = Auth::user()->orders()->with('orderItems.product')->latest()->paginate(10);
