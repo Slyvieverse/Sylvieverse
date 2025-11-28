@@ -134,4 +134,8 @@ class Auction extends Model
                      ->where('planned_end_time', '>', now())
                      ->where('planned_end_time', '<=', now()->addMinutes($minutes));
     }
+    public function winner()
+    {
+        return $this->belongsTo(User::class, 'winner_id');
+    }
 }

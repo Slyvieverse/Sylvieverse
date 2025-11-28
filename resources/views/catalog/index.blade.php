@@ -275,69 +275,7 @@
                 </form>
             </div>
 
-            <!-- Enhanced Featured Live Auction Banner -->
-            @if($featuredAuction = \App\Models\Auction::with('product')->where('status', 'active')->inRandomOrder()->first())
-                <div class="mb-16 group cursor-pointer">
-                    <div class="bg-gradient-to-r from-[--color-primary-500]/10 via-[--color-accent-500]/10 to-[--color-primary-500]/10 backdrop-blur-xl border border-[--color-accent-500]/50 rounded-3xl p-1 shadow-2xl shadow-[--color-accent-500]/20 hover:shadow-[--color-accent-500]/30 transition-all duration-500 overflow-hidden card-3d">
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                        <div class="grid lg:grid-cols-2 gap-8 items-center relative z-10 bg-[--color-background-800]/80 rounded-2xl p-8">
-                            <div class="space-y-6">
-                                <div class="flex items-center gap-3">
-                                    <span class="px-4 py-2 bg-gradient-to-r from-[--color-accent-600] to-[--color-accent-500] text-white text-sm font-bold rounded-full animate-pulse flex items-center gap-2">
-                                        <div class="w-2 h-2 bg-white rounded-full"></div>
-                                        LIVE AUCTION
-                                    </span>
-                                    <span class="text-[--color-accent-400] font-semibold text-sm">Ending Soon!</span>
-                                </div>
-
-                                <h2 class="text-3xl lg:text-4xl font-bold text-[--color-text-50] leading-tight">
-                                    {{ $featuredAuction->product->name }}
-                                </h2>
-
-                                <p class="text-[--color-text-200]">Current Bid</p>
-                                <p class="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[--color-accent-400] to-[--color-primary-400] bg-clip-text text-transparent">
-                                    ${{ number_format($featuredAuction->current_bid ?? $featuredAuction->starting_price, 2) }}
-                                </p>
-
-                                <div class="flex flex-wrap gap-4 items-center">
-                                    <a href="{{ route('auctions.show', $featuredAuction) }}"
-                                       class="bg-gradient-to-r from-[--color-primary-600] to-[--color-accent-600] hover:from-[--color-primary-700] hover:to-[--color-accent-700] text-white font-bold px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 btn-3d">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                        Place Bid
-                                    </a>
-
-                                    <div class="text-[--color-text-50]">
-                                        <p class="text-sm opacity-70">Ends in</p>
-                                        <p class="text-xl font-bold text-[--color-accent-400]">
-                                            {{ $featuredAuction->planned_end_time->diffForHumans() }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="relative group/image">
-                                <div class="relative overflow-hidden rounded-2xl shadow-2xl">
-                                    <img src="{{ $featuredAuction->product->image_url ?? asset('images/placeholder.jpg') }}"
-                                         class="w-full h-64 lg:h-80 object-cover transform group-hover/image:scale-110 transition-transform duration-700"
-                                         alt="{{ $featuredAuction->product->name }}">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                                    <div class="absolute bottom-4 left-4 right-4">
-                                        <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                                            <div class="flex justify-between items-center text-white">
-                                                <span class="font-semibold">Highest Bidder</span>
-                                                <span class="text-[--color-accent-400] font-bold">#{{ rand(1, 50) }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
+        
 
             <!-- Enhanced Products Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">

@@ -17,11 +17,34 @@ use App\Http\Controllers\BidController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WatchlistController;
+use App\Models\Auction;
+use App\Models\Bid;
+use App\Models\User;
+
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    $featuredAuctions = App\Models\Auction::with('product')
+        ->where('status', 'active')
+        ->orderByDesc('current_bid')
+        ->limit(6)
+        ->get();
 
+    $recentActivity = App\Models\Bid::with(['bidder', 'auction.product'])
+        ->latest()
+        ->limit(8)
+        ->get()
+        ->map(fn($bid) => [
+            'time' => $bid->created_at->diffForHumans(),
+            'user' => $bid->bidder->name,
+            'action' => 'placed a bid on',
+            'product' => $bid->auction->product->name,
+            'amount' => number_format($bid->amount, 2) . ' ETH',
+        ]);
+
+    $totalCollectors = App\Models\User::count();
+
+    return view('welcome', compact('featuredAuctions', 'recentActivity', 'totalCollectors'));
+});
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

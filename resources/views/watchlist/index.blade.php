@@ -21,7 +21,8 @@
                         <div class="group bg-[#1e1e2f]/70 backdrop-blur-xl border border-[#5b21b6]/30 rounded-2xl overflow-hidden hover:border-[#c084fc]/60 transition-all duration-500 hover:shadow-2xl hover:shadow-[#7c3aed]/20">
                             <a href="{{ route('catalog', $item->product) }}" class="block">
                                 <div class="relative overflow-hidden">
-                                    <img src="{{ $item->product->image_url ?? asset('images/placeholder.jpg') }}"
+                                    <img src="{{ $item->product->image_url ? asset('storage/' . $item->product->image_url) : asset('images/default-product.png') }}"
+                                 
                                          class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110"
                                          alt="{{ $item->product->name }}">
                                     <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0e]/80 via-transparent to-transparent"></div>
