@@ -14,6 +14,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\UserOrderController;
 use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\BidController;
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -120,4 +121,13 @@ Route::group(['middleware' => ['auth', 'isAdmin'], 'prefix' => 'admin', 'as' => 
     Route::resource('auctions', AdminAuctionController::class);
     Route::post('auctions/{auction}/cancel', [AdminAuctionController::class, 'cancel'])->name('auctions.cancel');
     Route::post('auctions/{auction}/close', [AdminAuctionController::class, 'close'])->name('auctions.close');
+});
+
+
+Route::get('/about', [PageController::class, 'about']);
+Route::get('/contact', [PageController::class, 'contact']);
+
+// routes/web.php
+Route::get('/contact', function () {
+    return view('contact');
 });

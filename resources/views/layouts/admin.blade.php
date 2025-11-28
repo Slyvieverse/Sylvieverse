@@ -99,8 +99,6 @@
                         ['route' => '/admin/discounts', 'name' => 'Discount Management'],
                         ['route' => '/admin/orders', 'name' => 'Order Management'],
                         ['route' => '/admin/auctions', 'name' => 'Auction Management'],
-                        ['route' => '/admin/analytics', 'name' => 'Analytics'],
-                        ['route' => '/admin/settings', 'name' => 'Settings'],
                     ];
                     // Dynamic Active class logic (simplified for example)
                     $currentPath = Request::path();
