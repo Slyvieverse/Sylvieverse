@@ -43,6 +43,46 @@ class AuctionController extends Controller
         return view('auctions.create', ['categories' => Category::all()]);
     }
 
+    public function edit(Auction $auction)
+    {
+        return view('auctions.edit', ['categories' => Category::all(), 'auction' => $auction]);
+    }
+
+    public function update(Request $request, Auction $auction)
+    {
+        $validated = $request->validate([
+            'name'             => 'required|string|max:255',
+            'description'      => 'nullable|string',
+            'price'            => 'required|numeric|min:0',
+            'category_id'      => 'required|exists:categories,id',
+            'stock_quantity'   => 'required|integer|min:1',
+            'image_url'        => 'nullable|image|mimes:jpeg,png,jpg|max:3072',
+            'starting_price' => 'required|numeric|min:0.01',
+            'start_time' => 'required|date|after:now',
+            'planned_end_time' => 'required|date|after:now+5minutes',
+        ]);
+
+        $productData = $request->only(['name', 'description', 'price', 'category_id', 'stock_quantity']);
+
+        if ($request->hasFile('image_url')) {
+            if ($auction->product->image_url) {
+                Storage::disk('public')->delete($auction->product->image_url);
+            }
+            $productData['image_url'] = $request->file('image_url')->store('products', 'public');
+        }
+
+        $auction->product->update($productData);
+
+        $auction->update([
+            'start_time'      => $validated['start_time'],
+            'starting_price'   => $validated['starting_price'],
+            'planned_end_time' => $validated['planned_end_time'],
+        ]);
+        
+
+        return redirect()->route('auctions.show', $auction)->with('success', 'Auction updated successfully.');
+    }   
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -53,6 +93,7 @@ class AuctionController extends Controller
             'stock_quantity'   => 'required|integer|min:1',
             'image_url'        => 'nullable|image|mimes:jpeg,png,jpg|max:3072',
             'starting_price'   => 'required|numeric|min:0.01',
+            'start_time' => 'required|date|after:now',
             'planned_end_time' => 'required|date|after:now+5minutes',
         ]);
 
@@ -67,6 +108,7 @@ class AuctionController extends Controller
         $product = Product::create($productData);
 
         Auction::create([
+            'start_time'      => $validated['start_time'],
             'product_id'       => $product->id,
             'seller_id'        => Auth::id(),
             'starting_price'   => $validated['starting_price'],

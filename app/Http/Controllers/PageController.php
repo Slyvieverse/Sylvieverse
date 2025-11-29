@@ -3,12 +3,41 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ContactFormSubmitted;
+use App\Models\Auction;
+use App\Models\Bid;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-
+    
 class PageController extends Controller
 {
+  public function home()
+{
+    $featuredAuctions = Auction::with('product')
+        ->where('status', 'active')
+        ->orderByDesc('current_bid')
+        ->limit(6)
+        ->get();
+
+    $recentActivity = Bid::with(['bidder', 'auction.product'])
+        ->latest()
+        ->limit(8)
+        ->get()
+        ->map(function($bid) {
+            return [
+                'time' => $bid->created_at->diffForHumans(),
+                'user' => $bid->bidder->name ?? 'Unknown User',
+                'action' => 'placed a bid on',
+                'product' => $bid->auction->product->name ?? 'Unknown Product',
+                'amount' => number_format($bid->amount, 2) . ' USD',
+            ];
+        });
+
+    $totalCollectors = User::count();
+
+    return view('welcome', compact('featuredAuctions', 'recentActivity', 'totalCollectors'));
+}
        public function about()
     {
         return view('about');

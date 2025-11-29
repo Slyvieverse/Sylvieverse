@@ -15,11 +15,10 @@
                         $navItems = [
                             ['route' => 'catalog', 'label' => 'Catalog'],
                             ['route' => 'auctions.index', 'label' => 'Live Auctions'],
+                            ['route' => 'contact.index', 'label' => 'Contact Us'],
+                            ['route' => 'about.index', 'label' => 'About Us'],
                         ];
-                        if (Auth::check()) {
-                            $navItems[] = ['route' => 'user.orders.index', 'label' => 'My Orders'];
-                            $navItems2[] = ['route' => 'auctions.my', 'label' => 'My Auctions'];
-                        }
+                     
                     @endphp
 
                     @foreach($navItems as $item)
@@ -35,30 +34,18 @@
                             <div class="absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r from-[var(--color-primary-400)] to-[var(--color-accent-400)] rounded-full transition-all duration-300 group-hover:scale-x-100 group-hover:opacity-100 {{ $activeUnderline }}"></div>
                         </a>
                     @endforeach
-                    @foreach($navItems2 as $item)
-                        @php
-                            // Simulating a basic way to determine the active link (requires a path checking function in a real app)
-                            $isActive = request()->routeIs($item['route']) || (strpos(url()->current(), route($item['route'])) !== false);
-                            $activeClass = $isActive ? 'text-[var(--color-accent-400)] font-bold' : 'text-[var(--color-text-200)] hover:text-[var(--color-text-50)]';
-                            $activeUnderline = $isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0';
-                        @endphp
-                        <a href="{{ route($item['route']) }}"
-                           class="relative px-2 py-2 {{ $activeClass }} transition-all duration-300 font-semibold group">
-                            <span class="relative z-10">{{ $item['label'] }}</span>
-                            <div class="absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r from-[var(--color-primary-400)] to-[var(--color-accent-400)] rounded-full transition-all duration-300 group-hover:scale-x-100 group-hover:opacity-100 {{ $activeUnderline }}"></div>
-                        </a>
-                    @endforeach
+                 
                 </div>
             </div>
 
             <div class="flex items-center space-x-4 sm:space-x-6">
                 @auth
                 <a href="{{ route('auctions.create') }}"
-                   class="hidden md:flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-[var(--color-primary-600)] to-[var(--color-accent-600)] hover:from-[var(--color-primary-500)] hover:to-[var(--color-accent-500)] text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-xl hover:shadow-[var(--color-accent-500)]/40 text-sm xl:text-base">
+                   class="hidden md:flex items-center space-x-2 px-1 py-1 bg-gradient-to-r from-[var(--color-primary-600)] to-[var(--color-accent-600)] hover:from-[var(--color-primary-500)] hover:to-[var(--color-accent-500)] text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-xl hover:shadow-[var(--color-accent-500)]/40 text-sm xl:text-base">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-                    <span>Create Auction</span>
+                    <span>Auction</span>
                 </a>
                 @endauth
 
@@ -161,6 +148,8 @@
                                 </a>
 
                                 @foreach([
+                                     ['route' => 'auctions.my', 'label' => 'My Auctions', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>'],
+
                                     ['route' => 'user.orders.index', 'label' => 'My Orders', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>'],
                                     ['route' => 'watchlist.index', 'label' => 'Watchlist', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>'],
                                 ] as $item)
